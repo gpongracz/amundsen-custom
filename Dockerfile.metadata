@@ -1,30 +1,32 @@
-FROM python:3.7-slim
+FROM python:3.7-slim as base
+WORKDIR /app
+RUN pip3 install gunicorn
 
-ENV LANG="en_US.utf8" \
-    AMUNDSEN_SERVICE_NAME="metadata" \
-    # use sock
-    GUNICORN_BIND="0.0.0.0:5002" \
-    GUNICORN_TIMEOUT=60 \
-    GUNICORN_WORKERS=2 \
-    FLASK_DEBUG=0 \
-    FLASK_ENV=production
+RUN apt-get update 
+RUN apt-get upgrade -y
+RUN apt-get install git -y
 
-ENV GUNICORN_CMD_ARGS="--bind=${GUNICORN_BIND} --timeout=${GUNICORN_TIMEOUT} --workers=${GUNICORN_WORKERS} --access-logfile - -"
+COPY amundsen/metadata/ /app
+COPY amundsen/requirements-dev.txt /app/requirements-dev.txt
+COPY amundsen/requirements-common.txt /app/requirements-common.txt
 
-# Copy only what's necessary for the install first
-COPY amundsen/metadata /usr/local/amundsen/metadata/upstream
-COPY metadata/requirements.txt /usr/local/amundsen/metadata/
-WORKDIR /usr/local/amundsen/metadata/
+CMD [ "python3", "metadata_service/metadata_wsgi.py" ]
 
-# Install the local copy of upstream
-RUN pip install upstream/ && \
-    # Install the custom requirements
-    pip install -r requirements.txt
+FROM base as oidc-release
 
-# Copy the other commonly edited files
-COPY metadata/configs configs/
-COPY metadata/wsgi.py .
+RUN  pip3 install -e .&& \
+     pip3 install -e .[oidc]
 
-EXPOSE 5002
+ENV FLASK_APP_MODULE_NAME flaskoidc
+ENV FLASK_APP_CLASS_NAME FlaskOIDC
+ENV FLASK_OIDC_WHITELISTED_ENDPOINTS status,healthcheck,health
+ENV SQLALCHEMY_DATABASE_URI sqlite:///sessions.db
 
-CMD ["gunicorn", "wsgi:app"," --timeout 1800", "--preload"]
+# You will need to set these environment variables in order to use the oidc image
+# FLASK_OIDC_CONFIG_URL - url endpoint for your oidc provider config
+# FLASK_OIDC_PROVIDER_NAME - oidc provider name
+# FLASK_OIDC_CLIENT_ID - oidc client id
+# FLASK_OIDC_CLIENT_SECRET - oidc client secret
+
+FROM base as release
+RUN pip3 install -e .

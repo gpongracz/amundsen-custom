@@ -18,7 +18,7 @@ services:
       networks:
         - amundsennet
   elasticsearch:
-      image: elasticsearch:6.7.0
+      image: elasticsearch:7.10.1
       container_name: es_amundsen
       ports:
           - 9200:9200
@@ -30,6 +30,9 @@ services:
           hard: 65536
       volumes:
         - ./.local/elasticsearch/data:/usr/share/elasticsearch/data
+      environment:
+        - discovery.type=single-node
+        - xpack.security.enable=false
   amundsensearch:
       build:
         context: .
@@ -58,6 +61,9 @@ services:
          - PROXY_HOST=bolt://neo4j_amundsen
   amundsenfrontend:
       build:
+        args:
+          SEARCHSERVICE_BASE: http://amundsensearch:5001
+          METADATASERVICE_BASE: http://amundsenmetadata:5002
         context: .
         dockerfile: Dockerfile.frontend
       container_name: amundsenfrontend
@@ -71,6 +77,7 @@ services:
       environment:
         - SEARCHSERVICE_BASE=http://amundsensearch:5001
         - METADATASERVICE_BASE=http://amundsenmetadata:5002
+        - FRONTEND_SVC_CONFIG_MODULE_CLASS=amundsen_application.config.TestConfig
 
 networks:
   amundsennet:

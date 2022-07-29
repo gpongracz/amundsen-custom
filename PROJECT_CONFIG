@@ -1,0 +1,5 @@
+AWS_ECR_ACCOUNT_ID=795947944754
+
+AWS_REGION=ap-southeast-2
+
+PROJECT_NAME=amundsen-custom

@@ -10,6 +10,8 @@ destination="/usr/local/amundsen/frontend/configs/.custom_build"
 upstream_static="/usr/local/amundsen/frontend/upstream/amundsen_application/static"
 private_static="/usr/local/amundsen/frontend/configs/static"
 
+
+
 echo "Cleaning previous build in: ${destination}/"
 rm -rf ${destination}
 mkdir ${destination}
