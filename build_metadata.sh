@@ -19,6 +19,7 @@ echo "ON AWS_ECR_ACCOUNT_ID: $AWS_ECR_ACCOUNT_ID"
 
 # build metadata
 docker build -f Dockerfile.$MODULE -t $COMPONENT_NAME .
+
 docker tag $COMPONENT_NAME $COMPONENT_NAME:latest
 docker tag $COMPONENT_NAME:latest $AWS_ECR_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$COMPONENT_NAME:latest
 echo "Built image $COMPONENT_NAME:latest"
