@@ -9,11 +9,6 @@ COPY amundsen/frontend/amundsen_application/static/package-lock.json /app/amunds
 RUN npm install
 
 COPY amundsen/frontend/amundsen_application/static/ /app/amundsen_application/static/
-
-# CUSTOM CONFIGS
-
-COPY frontend/static /usr/local/amundsen/frontend/configs/static
-
 RUN npm rebuild node-sass
 RUN npm run dev-build
 

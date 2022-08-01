@@ -13,8 +13,10 @@ services:
           - 7474:7474
           - 7687:7687
       volumes:
-          - ./configs/neo4j/conf:/var/lib/neo4j/conf
-          - ./.local/neo4j/data:/neo4j/data
+          - ./example/docker/neo4j/conf:/var/lib/neo4j/conf
+          - ./example/docker/neo4j/plugins:/var/lib/neo4j/plugins
+          - ./example/backup:/backup
+          - neo4j_data:/data
       networks:
         - amundsennet
   elasticsearch:
@@ -29,7 +31,7 @@ services:
           soft: 65536
           hard: 65536
       volumes:
-        - ./.local/elasticsearch/data:/usr/share/elasticsearch/data
+        - es_data:/usr/share/elasticsearch/data
       environment:
         - discovery.type=single-node
         - xpack.security.enable=false
@@ -81,3 +83,7 @@ services:
 
 networks:
   amundsennet:
+
+volumes:
+  es_data:
+  neo4j_data:
